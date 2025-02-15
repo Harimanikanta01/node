@@ -65,6 +65,9 @@ app.get('/take',async(req,res)=>{
         console.log(error)
     }
 })
+app.get("/",(req,res)=>{
+    res.send('working')
+})
 app.listen(4000,()=>{
     console.log("server running on 4000")
 })
