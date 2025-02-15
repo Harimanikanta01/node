@@ -1,4 +1,4 @@
-
+require('dotenv').config();
 
 const express=require("express")
 const mongoose=require("mongoose")
@@ -19,10 +19,9 @@ const storage=multer.diskStorage({
     }
 })
 app.use("/uploads",express.static(path.join(__dirname,'uploads')))
-const url = "mongodb+srv://punugulahari1:12345@cluster0.fmy2e.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 try{
-    mongoose.connect(url)
+    mongoose.connect(process.env.MONGO_URI)
     console.log("db connected")
 }
 catch(error){
