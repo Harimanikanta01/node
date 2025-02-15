@@ -17,8 +17,8 @@ const storage=multer.diskStorage({
     }
 })
 app.use("/uploads",express.static(path.join(__dirname,'uploads')))
+const url = "mongodb+srv://punugulahari1:12345@cluster0.fmy2e.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-const url="mongodb://localhost:27017/movie"
 try{
     mongoose.connect(url)
     console.log("db connected")
