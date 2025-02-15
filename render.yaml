@@ -5,12 +5,8 @@ services:
     buildCommand: npm install
     startCommand: npm start
     autoDeploy: true
-    branches:
-      - main
     envVars:
       - key: MONGO_URI
         value: "mongodb+srv://punugulahari1:12345@cluster0.fmy2e.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-
-    instances: 1
     plan: free
     region: us
