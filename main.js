@@ -71,8 +71,7 @@ app.get('/take',async(req,res)=>{
     }
 })
 app.get("/",async(req,res)=>{
-    const am=await npt.find()
-    res.json(am)
+ res.send("ok")
     
 })
 app.listen(process.env.PORT || 4000, () => {
