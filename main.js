@@ -2,10 +2,12 @@ const express=require("express")
 const mongoose=require("mongoose")
 const multer=require("multer")
 const app=express()
+const cors=require("cors")
 app.use(cors())
 const npt=require("./Model")
 const path=require('path')
 const mode1=require("./model1")
+
 const storage=multer.diskStorage({
     destination:(req,file,cb)=>{
         cb(null,"uploads/")
