@@ -1,78 +1,91 @@
-require('dotenv').config();
+require('dotenv').config(); // Load environment variables from .env file
 
-const express=require("express")
-const mongoose=require("mongoose")
-const multer=require("multer")
-const app=express()
-const cors=require("cors")
-app.use(cors())
-const npt=require("./Model")
-const path=require('path')
-const mode1=require("./model1")
+const express = require("express");
+const mongoose = require("mongoose");
+const multer = require("multer");
+const app = express();
+const cors = require("cors");
+const npt = require("./Model");
+const path = require('path');
+const mode1 = require("./model1");
 
-const storage=multer.diskStorage({
-    destination:(req,file,cb)=>{
-        cb(null,"uploads/")
+app.use(cors());
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/");
     },
-    filename:(req,file,cb)=>{
-        cb(null,Date.now()+path.extname(file.originalname))
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
     }
-})
-app.use("/uploads",express.static(path.join(__dirname,'uploads')))
+});
 
-try{
-    mongoose.connect(process.env.MONGO_URI)
-    console.log("db connected")
-}
-catch(error){
-    console.log(error)
-}
-const upload=multer({"storage":storage})
-app.post("/post",upload.single('image'),(req,res)=>{
-    const path1=`http://localhost:4000/uploads/${req.file.filename}`
-    
-    const amn=new npt({image:path1,text:req.body.text})
-    try{
-        amn.save()
-        console.log("sended to db")
-        res.send("verified")
-        console.log(amn)
-    }
-    catch(error){
-        console.log(error)
-    }
-})
-app.get("/get",async(req,res)=>{
-    const am=await npt.find()
-    res.json(am)
-    console.log(am)
-})
+app.use("/uploads", express.static(path.join(__dirname, 'uploads')));
 
-app.post('/send',upload.single('image'),(req,res)=>{
-    const fi=`http://localhost:4000/uploads/${req.file.filename}`
-    const oi=new mode1({image:fi,text:req.body.text})
-    try{
-        oi.save()
-        console.log("send to db")
-        res.send("sended to db")
-    }
-    catch(error){
-        console.log(error)
-    }
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 })
-app.get('/take',async(req,res)=>{
-    const ner=await mode1.find().lean()
-    try{
-        res.json(ner)
-    }
-    catch(error){
-        console.log(error)
-    }
+.then(() => {
+    console.log("DB connected successfully");
 })
-app.get("/",async(req,res)=>{
- res.send("ok")
+.catch(error => {
+    console.error("DB connection error:", error);
+});
+
+const upload = multer({ "storage": storage });
+
+app.post("/post", upload.single('image'), (req, res) => {
+    const path1 = `http://localhost:${process.env.PORT}/uploads/${req.file.filename}`;
     
-})
+    const amn = new npt({ image: path1, text: req.body.text });
+    try {
+        amn.save();
+        console.log("sended to db");
+        res.send("verified");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error saving to database");
+    }
+});
+
+app.get("/get", async (req, res) => {
+    try {
+        const am = await npt.find();
+        res.json(am);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error fetching data");
+    }
+});
+
+app.post('/send', upload.single('image'), (req, res) => {
+    const fi = `http://localhost:${process.env.PORT}/uploads/${req.file.filename}`;
+    const oi = new mode1({ image: fi, text: req.body.text });
+    try {
+        oi.save();
+        console.log("send to db");
+        res.send("sended to db");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error saving to database");
+    }
+});
+
+app.get('/take', async (req, res) => {
+    try {
+        const ner = await mode1.find().lean();
+        res.json(ner);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error fetching data");
+    }
+});
+
+app.get("/", async (req, res) => {
+    res.send("ok");
+});
+
 app.listen(process.env.PORT || 4000, () => {
-    console.log("Server running on port 4000");
+    console.log(`Server running on port ${process.env.PORT || 4000}`);
 });
