@@ -1,78 +1,61 @@
-const express=require("express")
-const mongoose=require("mongoose")
-const multer=require("multer")
-const app=express()
-const cors=require("cors")
-app.use(cors())
-const npt=require("./Model")
-const path=require('path')
-const mode1=require("./model1")
 
-const storage=multer.diskStorage({
-    destination:(req,file,cb)=>{
-        cb(null,"uploads/")
-    },
-    filename:(req,file,cb)=>{
-        cb(null,Date.now()+path.extname(file.originalname))
-    }
-})
-app.use("/uploads",express.static(path.join(__dirname,'uploads')))
+const express = require("express");
+const mongoose = require("mongoose");
+const multer = require("multer");
+const app = express();
+const cors = require("cors");
+const path = require('path');
+const npt = require("./Model");
+const mode1 = require("./model1");
+
+app.use(cors());
+
 const url = "mongodb+srv://punugulahari1:12345@cluster0.fmy2e.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-try{
-    mongoose.connect(url)
-    console.log("db connected")
-}
-catch(error){
-    console.log(error)
-}
-const upload=multer({"storage":storage})
-app.post("/post",upload.single('image'),(req,res)=>{
-    const path1=`http://localhost:4000/uploads/${req.file.filename}`
-    
-    const amn=new npt({image:path1,text:req.body.text})
-    try{
-        amn.save()
-        console.log("sended to db")
-        res.send("verified")
-        console.log(amn)
-    }
-    catch(error){
-        console.log(error)
-    }
-})
-app.get("/get",async(req,res)=>{
-    const am=await npt.find()
-    res.json(am)
-    console.log(am)
-})
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log("DB connected"))
+    .catch(err => console.log(err));
 
-app.post('/send',upload.single('image'),(req,res)=>{
-    const fi=`http://localhost:4000/uploads/${req.file.filename}`
-    const oi=new mode1({image:fi,text:req.body.text})
-    try{
-        oi.save()
-        console.log("send to db")
-        res.send("sended to db")
-    }
-    catch(error){
-        console.log(error)
-    }
-})
-app.get('/take',async(req,res)=>{
-    const ner=await mode1.find().lean()
-    try{
-        res.json(ner)
-    }
-    catch(error){
-        console.log(error)
-    }
-})
-app.get("/",async(req,res)=>{
-    const am=await npt.find()
-    res.json(am)
+const storage = multer.memoryStorage(); // Use memory storage for Vercel
+const upload = multer({ storage });
+
+app.post("/post", upload.single('image'), (req, res) => {
+    const file = req.file;
+    // Upload file to cloud storage and get the URL
+    const fileUrl = "https://your-cloud-storage-url.com/" + file.originalname;
     
-})
+    const amn = new npt({ image: fileUrl, text: req.body.text });
+    amn.save()
+        .then(() => res.send("Verified"))
+        .catch(err => res.status(500).send(err));
+});
+
+app.get("/get", async (req, res) => {
+    const am = await npt.find();
+    res.json(am);
+});
+
+app.post('/send', upload.single('image'), (req, res) => {
+    const file = req.file;
+    // Upload file to cloud storage and get the URL
+    const fileUrl = "https://your-cloud-storage-url.com/" + file.originalname;
+    
+    const oi = new mode1({ image: fileUrl, text: req.body.text });
+    oi.save()
+        .then(() => res.send("Sent to DB"))
+        .catch(err => res.status(500).send(err));
+});
+
+app.get('/take', async (req, res) => {
+    const ner = await mode1.find().lean();
+    res.json(ner);
+});
+
+app.get("/", async (req, res) => {
+    const am = await npt.find();
+    res.json(am);
+});
+
 app.listen(process.env.PORT || 4000, () => {
-    console.log("Server running on port 4000");
+    console.log("Server running on port " + (process.env.PORT || 4000));
 });
