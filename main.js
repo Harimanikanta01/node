@@ -73,6 +73,6 @@ app.get("/",async(req,res)=>{
     res.json(am)
     
 })
-app.listen(4000,()=>{
-    console.log("server running on 4000")
-})
+app.listen(process.env.PORT || 4000, () => {
+    console.log("Server running on port 4000");
+});
