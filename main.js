@@ -29,12 +29,6 @@ mongoose.connect(process.env.MONGO_URI)
   console.error("DB connection error:", error);
 });
 
-.then(() => {
-    console.log("DB connected successfully");
-})
-.catch(error => {
-    console.error("DB connection error:", error);
-});
 
 const upload = multer({ "storage": storage });
 
