@@ -21,11 +21,14 @@ const storage = multer.diskStorage({
 });
 
 app.use("/uploads", express.static(path.join(__dirname, 'uploads')));
-
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+mongoose.connect(process.env.MONGO_URI)
+.then(() => {
+  console.log("DB connected successfully");
 })
+.catch(error => {
+  console.error("DB connection error:", error);
+});
+
 .then(() => {
     console.log("DB connected successfully");
 })
